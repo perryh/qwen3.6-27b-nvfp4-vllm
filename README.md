@@ -48,14 +48,15 @@ that automatically) or export it in your shell.
 
 ## Memory configuration
 
-Weights use ~22 GiB. On a 32 GiB card (e.g. RTX 5090) the default 256K context
-+ CUDA graphs OOM, so the `Dockerfile` `CMD` sets:
+Weights use ~22 GiB. On a 32 GiB card (e.g. RTX 5090) the model's full 256K
+context + CUDA graphs OOM, so the `entrypoint.sh` sets:
 
-- `--max-model-len 98304` — cap context near the KV-cache ceiling (~115K tokens
-  on a 32 GiB card; gives ~1.17x concurrency). Lower for more concurrency.
+- `--max-model-len 262144` — the model's full 256K context window. **This will
+  OOM on 32GB cards**; lower it to fit (e.g. 98304 ≈ the KV-cache ceiling,
+  giving ~1.17x concurrency).
 
 The context length is configurable via the `MAX_MODEL_LEN` env var (default
-98304):
+262144):
 
 ```bash
 MAX_MODEL_LEN=65536 docker compose up -d      # 64K context, 1.66x concurrency

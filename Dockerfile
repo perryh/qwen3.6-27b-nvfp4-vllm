@@ -12,18 +12,18 @@
 # 13.0 (safely below the 13.2 gibberish threshold Unsloth warns about). No pip
 # installs needed.
 #
-# Memory: weights ~22 GiB. On a 32 GiB card we cap context at 98304 (near the
-# ~115K-token KV-cache ceiling), use FP8 KV cache, disable CUDA graphs
-# (--enforce-eager) and enable expandable_segments to fit. This leaves ~1.17x
-# concurrency; lower --max-model-len for more concurrent requests, or raise it
-# on a larger GPU.
+# Memory: weights ~22 GiB. The default --max-model-len is 262144 (the model's
+# full 256K context window). This will OOM on 32GB cards — lower MAX_MODEL_LEN
+# to fit (e.g. 98304 ≈ the KV-cache ceiling on a 32 GiB card). We also use FP8
+# KV cache, disable CUDA graphs (--enforce-eager) and enable
+# expandable_segments to reduce fragmentation.
 
 FROM vllm/vllm-openai:v0.24.0
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENV MAX_MODEL_LEN=98304 \
+ENV MAX_MODEL_LEN=262144 \
     HF_TOKEN= \
     PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
