@@ -51,7 +51,16 @@ that automatically) or export it in your shell.
 Weights use ~22 GiB. On a 32 GiB card (e.g. RTX 5090) the default 256K context
 + CUDA graphs OOM, so the `Dockerfile` `CMD` sets:
 
-- `--max-model-len 32768` — cap context (raise only if your GPU has headroom)
+- `--max-model-len 98304` — cap context near the KV-cache ceiling (~115K tokens
+  on a 32 GiB card; gives ~1.17x concurrency). Lower for more concurrency.
+
+The context length is configurable via the `MAX_MODEL_LEN` env var (default
+98304):
+
+```bash
+MAX_MODEL_LEN=65536 docker compose up -d      # 64K context, 1.66x concurrency
+# or: docker run -e MAX_MODEL_LEN=32768 ...
+```
 - `--kv-cache-dtype fp8_e4m3` — FP8 KV cache (~2x the context for the same RAM)
 - `--enforce-eager` — skip CUDA-graph capture to free VRAM
 - `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` — reduce fragmentation

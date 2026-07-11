@@ -16,6 +16,9 @@ services:
     environment:
       - HF_TOKEN=${HF_TOKEN:-}
       - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+      # Max context length (tokens). Default 98304 (~1.17x concurrency on 32GB).
+      # Override: MAX_MODEL_LEN=65536 docker compose up -d
+      - MAX_MODEL_LEN=${MAX_MODEL_LEN:-98304}
 
     # Required for vLLM + GPU inference.
     ipc: host
