@@ -1,0 +1,35 @@
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qwen36-27b-nvfp4-vllm:latest
+    container_name: qwen36-vllm
+
+    ports:
+      - "30000:30000"
+
+    # Keep model weights on the host and share them across containers/runs.
+    volumes:
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+    # Required for vLLM + GPU inference.
+    ipc: host
+    shm_size: 32g
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            # GPU to pin the container to. Override with:
+            #   GPU_DEVICE_ID=1 docker compose up -d
+            # (use the id from `nvidia-smi`). Defaults to 0.
+            - driver: nvidia
+              device_ids: ["${GPU_DEVICE_ID:-0}"]
+              capabilities: [gpu]
+
+    restart: unless-stopped

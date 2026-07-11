@@ -1,0 +1,8 @@
+# Local env files (may contain HF_TOKEN)
+.env
+
+# Python / editor cruft
+__pycache__/
+*.pyc
+.DS_Store
+*.swp
